@@ -2,6 +2,10 @@
 
 Repository containing the analysis to investigate how different mechanisms shape the within-population intraspecific morphological variation in North American birds.
 
+## Associated publications:
+
+Zulian, V and C Youngflesh. Drivers of phenotypic variability: How multiple mechanisms shape variation within populations of North American birds. In Review
+
 ## Repo structure:
 
 * `Scripts/`
@@ -9,9 +13,9 @@ Repository containing the analysis to investigate how different mechanisms shape
     * `1a-cv-modeling-NIMBLE.R` - read in `MAPS-master.rds` file and estimate hierarchically the CV for each species/station combinations using a NIMBLE model.
     * `1b-cv-processing.R` - process the results from `1a-cv-modeling-NIMBLE.R`, calculate the CV for multiple levels of biological organization (within sp, across sp, across stations, etc).
   * `2-covs-processing/`
-    * `2a-process-DHI.R` - read in DHI files from Radeloff et al. 2019 Remote Sensing of Environment. Calculate spatial and temporal variation as `dhi-YYYY-MM-DD-.csv`
+    * `2a-process-DHI.R` - read in DHI files from Radeloff et al. 2019 *Remote Sensing of Environment*. Calculate spatial and temporal variation as `dhi-YYYY-MM-DD-.csv`
     * `2b-process-range-size-distances.R` - read in BOTW species range, update names and calculate range size, migration distance, and distance to range edge (using different buffer sizes to remove the lakes and other holes in the distribution. Results saved as `dist_edge_size_migdist-YYYY-MM-DD.rds`.
-    * `2c-process-species-traits.R` - read in AVONET data (Tobias et al, 2022, Eco Letters (https://doi.org/10.1111/ele.13898)) and Bird et al, 2020, Cons Bio (https://doi.org/10.1111/cobi.13486) and compile Hand Wing Index (HWI) and generation length of each species as `trait_data-YYYY-MM-DD.csv`.
+    * `2c-process-species-traits.R` - read in AVONET data (Tobias et al. 2022 *Ecology Letters*) and Bird et al. 2020 *Conservation Biology* and compile Hand Wing Index (HWI) and generation length of each species as `trait_data-YYYY-MM-DD.csv`.
     * `2d-process-phylo.R` - read in consensus trees from BirdTree (https://data.vertlife.org/birdtree/Stage2/EricsonStage2_0001_1000.zip), check names, prune trees and save a consensus tree for the species of interest as `L1/consensus_tree-YYYY-MM-DD.rds`.
     * `2e-join-cov-cv.R` - read in cv data and covs data, run PCA for spatial and temporal variation, join all in a single file as `cv_data_covs-YYYY-MM-DD.rds`.
   * `3-within-pops-var-cv.R` - run the within species variation on CV for mass and wing.
@@ -30,7 +34,10 @@ Repository containing the analysis to investigate how different mechanisms shape
     * `BLIOCPhyloMasterTax.csv` - taxonomy info from BIRDNET. Used to process the phylogenetic trees.
     * `BOTW_2024/` - range maps for all species from http://datazone.birdlife.org/species/requestdis. Download date: 2024-11-22.
     * `mnt/` - phylogenetic trees from https://data.vertlife.org/birdtree/Stage2/EricsonStage2_0001_1000.zip. Download date: 2024-12-13.
-    * `Traits/` - different .csv files containing trait information. 
+    * `DHI/` - Dynamic Habitat Indices from Radeloff et al. 2019 *Remote Sensing of Environment* (https://doi.org/10.1016/j.rse.2018.12.009)
+    * `Traits/` - different .csv files containing trait information.
+     * `Bird_et_al_2020_Con_Bio.csv` - generation length data from Bird et al. 2020 *Conservation Biology* (https://doi.org/10.1111/cobi.13486)
+     * `Tobias_et_al_2022_Eco_Letters.csv` - AVONET trait database from Tobias et al. 2022 *Ecology Letters* (https://doi.org/10.1111/ele.13898)
   * `L1/`
     * `MAPS-master-YYYY-MM-DD.rds` - MAPS data
     * `DHI_rast-2024-12-12.tif` - DHI raster, mean productivity and temporal CV productivity. Intermediate product `2a-process-DHI.R`.
