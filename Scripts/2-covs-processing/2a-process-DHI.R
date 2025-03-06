@@ -22,8 +22,8 @@ maps_data_date <- "2024-12-12"
 dhi_date <- "2024-12-13"       #date of processing DHI files
 dir <- '~/Documents/MorphCVLatitude/' #change as needed
 # dir <- '~/Work/Research/Projects/MorphCVLatitude/'
-data_dir <- "/Users/vzulian/Library/CloudStorage/Box-Box/Youngflesh_Lab_Share/Zulian/DHI_Files/DHI"
-# data_dir <- '~/Box/Youngflesh_Lab_Share/Zulian/DHI_Files/DHI/'
+data_dir <- "XXXX"
+
 
 
 # load packages -----------------------------------------------------------
