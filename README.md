@@ -1,10 +1,7 @@
 # WithinPopsPhenoVar
 
-Repository containing the analysis to investigate how different mechanisms shape the within-population intraspecific morphological variation in North American birds.
+Repository containing the analysis to investigate how different mechanisms shape within-population intraspecific morphological variation in North American birds.
 
-## Associated publications:
-
-Zulian, V and C Youngflesh. Multiple mechanisms shape phenotypic variation across populations of North American birds. In Review
 
 ## Repo structure:
 
