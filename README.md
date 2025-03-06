@@ -4,7 +4,7 @@ Repository containing the analysis to investigate how different mechanisms shape
 
 ## Associated publications:
 
-Zulian, V and C Youngflesh. Drivers of phenotypic variability: How multiple mechanisms shape variation within populations of North American birds. In Review
+Zulian, V and C Youngflesh. Multiple mechanisms shape phenotypic variation in populations of North American birds. In Review
 
 ## Repo structure:
 
