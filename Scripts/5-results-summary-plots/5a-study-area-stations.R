@@ -9,8 +9,7 @@
 
 run_date <- Sys.Date()
 cv_data_date <- '2025-01-08'
-dir <- '~/Documents/MorphCVLatitude/' #change as needed
-
+dir <- 'XXXX' #location of working diretory - change as needed
 
 
 # load packages -----------------------------------------------------------
@@ -21,7 +20,6 @@ library(rnaturalearth)
 library(sf)
 library(raster)
 library(tmap)
-
 
 
 # read in data -----------------
