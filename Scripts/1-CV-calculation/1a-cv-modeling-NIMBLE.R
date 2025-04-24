@@ -26,7 +26,7 @@
 
 run_date <- Sys.Date()
 maps_date <- "2024-12-12"
-dir <- '~/Documents/MorphCVLatitude/' #change as needed
+dir <- 'XXXX' #location of working diretory - change as needed
 
 
 # load packages -----------------------------------------------------------
