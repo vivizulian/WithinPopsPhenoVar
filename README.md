@@ -7,13 +7,15 @@ Repository containing the analysis to investigate how different mechanisms shape
 
 ## Associated publications
 
-Zulian, V and C Youngflesh. Geography, environmental conditions, and life history shape patterns of intraspecific phenotypic variation in North American birds. *In Review*
+Zulian, V. and C. Youngflesh. Geography, environmental conditions, and life history shape patterns of intraspecific phenotypic variation in North American birds. *In Review*
 
 ## Data
 
 * Bird, J. P., R. Martin, H. R. Akçakaya, J. Gilroy, I. J. Burfield, S. Garnett, A. Symes, J. Taylor, Ç. H. Şekercioğlu, and S. H. M. Butchart. 2020. Generation lengths of the world’s birds and their implications for extinction risk. *Conservation Biology*. 34(5), 1252-1261. DOI: [doi.org/10.1111/cobi.13486](doi.org/10.1111/cobi.13486)
 
 * Tobias, J. A., C. Sheard, A. L. Pigot, A. J. M. Devenish, J. Yang, F. Sayol, M. H. C. Neate‐Clegg, N. Alioravainen, T. L. Weeks, R. A. Barber, P. A. Walkden, H. E. A. MacGregor, S. E. I. Jones, C. Vincent, A. G. Phillips, N. M. Marples, F. A. Montaño‐Centellas, V. Leandro‐Silva, S. Claramunt, B. Darski, B. G. Freeman, T. P. Bregman, C. R. Cooney, E. C. Hughes, E. J. R. Capp, Z. K. Varley, N. R. Friedman, H. Korntheuer, A. Corrales‐Vargas, C. H. Trisos, B. C. Weeks, D. M. Hanz, T. Töpfer, G. A. Bravo, V. Remeš, L. Nowak, L. S. Carneiro, A. J. Moncada R., B. Matysioková, D. T. Baldassarre, A. Martínez‐Salinas, J. D. Wolfe, P. M. Chapman, B. G. Daly, M. C. Sorensen, A. Neu, M. A. Ford, R. J. Mayhew, L. Fabio Silveira, D. J. Kelly, N. N. D. Annorbah, H. S. Pollock, A. M. Grabowska‐Zhang, J. P. McEntee, J. Carlos T. Gonzalez, C. G. Meneses, M. C. Muñoz, L. L. Powell, G. A. Jamie, T. J. Matthews, O. Johnson, G. R. R. Brito, K. Zyskowski, R. Crates, M. G. Harvey, M. Jurado Zevallos, P. A. Hosner, T. Bradfer‐Lawrence, J. M. Maley, F. G. Stiles, H. S. Lima, K. L. Provost, M. Chibesa, M. Mashao, J. T. Howard, E. Mlamba, M. A. H. Chua, B. Li, M. I. Gómez, N. C. García, M. Päckert, J. Fuchs, J. R. Ali, E. P. Derryberry, M. L. Carlson, R. C. Urriza, K. E. Brzeski, D. M. Prawiradilaga, M. J. Rayner, E. T. Miller, R. C. K. Bowie, R. Lafontaine, R. P. Scofield, Y. Lou, L. Somarathna, D. Lepage, M. Illif, E. L. Neuschulz, M. Templin, D. M. Dehling, J. C. Cooper, O. S. G. Pauwels, K. Analuddin, J. Fjeldså, N. Seddon, P. R. Sweet, F. A. J. DeClerck, L. N. Naka, J. D. Brawn, A. Aleixo, K. Böhning‐Gaese, C. Rahbek, S. A. Fritz, G. H. Thomas, and M. Schleuning. 2022. AVONET: morphological, ecological and geographical data for all birds. *Ecology Letters* 25:581–597. DOI: [https://doi.org/10.1111/ele.13898](https://doi.org/10.1111/ele.13898)
+
+* Radeloff, V. C., M. Dubinin, N. C. Coops, A. M. Allen, T. M. Brooks, M. K. Clayton, G. C. Costa, C. H. Graham, D. P. Helmers, A. R. Ives, D. Kolesov, A. M. Pidgeon, G. Rapacciuolo, E. Razenkova, N. Suttidate, B. E. Young, L. Zhu, and M. L. Hobi. 2019. The Dynamic Habitat Indices (DHIs) from MODIS and global biodiversity. *Remote Sensing of Environment* 222:204–214. DOI: [https://doi.org/10.1016/j.rse.2018.12.009]
 
 * BirdLife International and Handbook of the Birds of the World. (2022). Bird species distribution maps of the world. Version 2022.2. Available at [http://datazone.birdlife.org/species/requestdis](http://datazone.birdlife.org/species/requestdis).
   
