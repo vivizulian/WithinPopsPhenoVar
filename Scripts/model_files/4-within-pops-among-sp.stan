@@ -1,25 +1,4 @@
-// Within-pops variation on CV among species
-// Code to estimate the effect of dfferent covariates on the within-pop variation across species (across space) 
-
-// Index: 
-// k = species
-// N_sp: total number of species
-// sp_id: species identification for each observation of N_sp
-
-// We extracted the species estimated mean cv and uncertainty from the previous analysis.
-// Now we want to model cv as a function of:
-// range size
-// generation length
-// Hand wing index (HWI)
-// migratory status: 0 = species that do not migrate (n=10) and 1 = species that migrate (n=88)
-// by creating an observation model for the cv as:
-
-// CVobs_k ~ normal(CVact_k, sigmaCV_k), where CVobs_jk and sigmaCV_k are data and CVact_k is non-centered as:
-// CVact_k = exp(CVact_raw_k * sigma + mu_cv_k); 
-// mu_cv_k = mu_gamma + theta1 * rangesize_k + theta2 * genLeng_k + theta3 * HWI_k + 
-           // theta4 * migStatus_k;  //single gamma and thetas estimates
-
-
+// Code to estimate the effect of dfferent covariates on the within-pop variation across species
 
 data {
   int<lower=1> N_sp;                      // number of species
