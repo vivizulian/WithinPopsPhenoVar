@@ -53,7 +53,7 @@ data_mass_str <- cv_data_mass %>%
   tidyr::replace_na(list(ldre = 0))
 
 
-## Create data objects for Stan using PCA
+## Create data objects for Stan
 str(DATA_mass <- list(N_obs = NROW(data_mass_str),
                   N_species = length(unique(data_mass_str$sp_id)),
                   CVobs = data_mass_str$cv_within_post_mean*1000,
