@@ -20,10 +20,8 @@
 run_date <- Sys.Date()
 maps_data_date <- "2024-12-12" 
 dhi_date <- "2024-12-13"       #date of processing DHI files
-dir <- '~/Documents/MorphCVLatitude/' #change as needed
-# dir <- '~/Work/Research/Projects/MorphCVLatitude/'
-data_dir <- "XXXX"
-
+dir <- 'XXXX' #location of working diretory - change as needed
+data_dir <- "XXXX" #location of data - change as needed
 
 
 # load packages -----------------------------------------------------------
