@@ -15,7 +15,7 @@ library(dplyr)
 
 run_date <- Sys.Date()
 maps_run_date <- "2024-12-12" 
-dir <- '~/Documents/MorphCVLatitude/'
+dir <- 'XXXX' #location of working diretory - change as needed
 
 
 # read in data -----------------------------------------------------------
