@@ -14,8 +14,7 @@
 run_date <- Sys.Date()
 cv_data_date <- '2025-01-08'
 bl_run_date <- '2024-12-13'  #species ranges
-dir <- '~/Documents/MorphCVLatitude/' #change as needed
-
+dir <- 'XXXX' #location of working diretory - change as needed
 
 
 # load packages -----------------------------------------------------------
