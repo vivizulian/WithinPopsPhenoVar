@@ -1,30 +1,4 @@
-
-// Number 1:
 // Code to estimate the effect of dfferent covariates on the within-pop variation within species (across space) 
-
-// Index: 
-// j = stations
-// k = species
-
-// We extracted the station/species estimated mean cv and uncertainty from the previous analysis.
-// Now we want to model cv as a function of:
-// latitude, 
-// mean_dhi_cum_sd - environmental variation from year to year, 
-// sd_dhi_cum_mean - geodiversity, 
-// sd_elev_mosaic - geodiversity, 
-// distance_to_range_edge, 
-// by creating an observation model for the cv as:
-
-// CVobs_jk ~ normal(CVact_jk, sigmaCV_jk), where CVobs_jk and sigmaCV_jk are data and CVact_jk is non-centered as:
-// CVact_jk = exp(CVact_raw_jk * sigma + mu_cv_jk); 
-// mu_cv_jk = gamma_k + theta_k * lat_jk + theta2_k .* elev_jk + theta3_k .* distrange_jk + 
-           // theta4_k .* meanDHI_jk + theta5_k .* sdDHI_jk;  //gamma and thetas are species-specific estimates
-
-// Index used in the Stan code:
-// N_cn_id: total number observations (species and stations)
-// sp_id: species identification for each observation of N_cn_id
-// cn_id: species/station id for each observation of N_cn_id
-
 
 data {
   int<lower=1> N_species;                         // number of species
