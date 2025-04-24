@@ -269,11 +269,962 @@ wing <- ggplot() +
 #dev.off()
 
 
-pdf(paste0('Results/Fig3-results-within-pops-', run_date, '.pdf'), width = 12, height = 6)
+pdf(paste0('Results/Fig-results-within-pops-', run_date, '.pdf'), width = 12, height = 6)
 gridExtra::grid.arrange(mass, wing, nrow=1)
 dev.off()
 
 
+
+
+# combination line and cat plots ------------------------------------------
+
+#extract posteriors - mass
+mass_gamma_mn <- MCMCvis::MCMCpstr(fitMass, params = 'gamma')[[1]]
+mass_theta1_mn <- MCMCvis::MCMCpstr(fitMass, params = 'theta1')[[1]]
+mass_theta2_mn <- MCMCvis::MCMCpstr(fitMass, params = 'theta2')[[1]]
+mass_theta3_mn <- MCMCvis::MCMCpstr(fitMass, params = 'theta3')[[1]]
+mass_theta4_mn <- MCMCvis::MCMCpstr(fitMass, params = 'theta4')[[1]]
+
+mass_mu_gamma_ch <- MCMCvis::MCMCchains(fitMass, params = 'mu_gamma')
+mass_mu_theta1_ch <- MCMCvis::MCMCchains(fitMass, params = 'mu_theta1')
+mass_mu_theta2_ch <- MCMCvis::MCMCchains(fitMass, params = 'mu_theta2')
+mass_mu_theta3_ch <- MCMCvis::MCMCchains(fitMass, params = 'mu_theta3')
+mass_mu_theta4_ch <- MCMCvis::MCMCchains(fitMass, params = 'mu_theta4')
+
+#extract posteriors - wing
+wing_gamma_mn <- MCMCvis::MCMCpstr(fitWing, params = 'gamma')[[1]]
+wing_theta1_mn <- MCMCvis::MCMCpstr(fitWing, params = 'theta1')[[1]]
+wing_theta2_mn <- MCMCvis::MCMCpstr(fitWing, params = 'theta2')[[1]]
+wing_theta3_mn <- MCMCvis::MCMCpstr(fitWing, params = 'theta3')[[1]]
+wing_theta4_mn <- MCMCvis::MCMCpstr(fitWing, params = 'theta4')[[1]]
+
+wing_mu_gamma_ch <- MCMCvis::MCMCchains(fitWing, params = 'mu_gamma')
+wing_mu_theta1_ch <- MCMCvis::MCMCchains(fitWing, params = 'mu_theta1')
+wing_mu_theta2_ch <- MCMCvis::MCMCchains(fitWing, params = 'mu_theta2')
+wing_mu_theta3_ch <- MCMCvis::MCMCchains(fitWing, params = 'mu_theta3')
+wing_mu_theta4_ch <- MCMCvis::MCMCchains(fitWing, params = 'mu_theta4')
+
+
+#for each species
+str(raw_data_mass)
+usp <- unique(raw_data_mass$sp_id)
+
+#sim values mass
+pred_df <- data.frame(sp_id = rep(NA, 50 * length(usp)),
+                      lat = NA,
+                      lat_sc = NA,
+                      mass_pred_lat = NA,
+                      wing_pred_lat = NA,
+                      ldre = NA,
+                      ldre_sc = NA,
+                      mass_pred_ldre = NA,
+                      wing_pred_ldre = NA,
+                      DHI_spat = NA,
+                      DHI_spat_sc = NA,
+                      mass_pred_DHI_spat = NA,
+                      wing_pred_DHI_spat = NA,
+                      DHI_temp = NA,
+                      DHI_temp_sc = NA,
+                      mass_pred_DHI_temp = NA,
+                      wing_pred_DHI_temp = NA)
+counter <- 1
+for (i in 1:length(usp))
+{
+  #i <- 1
+  tt <- dplyr::filter(raw_data_mass, sp_id == usp[i]) %>%
+    dplyr::mutate(DHI_spat = log(DHI_spatial_var_10km), 
+                  DHI_temp = log(DHI_temporal_var_10km)) %>%
+    dplyr::select(lat, lat_sc, 
+                  ldre, ldre_sc, 
+                  DHI_spat,
+                  DHI_spat_sc, 
+                  DHI_temp,
+                  DHI_temp_sc)
+  
+  #LAT
+  #get sc values and sim line
+  t_lat_sc_sim <- seq(min(tt$lat_sc), max(tt$lat_sc), length.out = 50)
+  #to rescale because data were * 1000 to fit model
+  t_lat_mass_pred <- (mass_gamma_mn[i] + mass_theta1_mn[i] * t_lat_sc_sim) / 1000
+  t_lat_wing_pred <- (wing_gamma_mn[i] + wing_theta1_mn[i] * t_lat_sc_sim) / 1000
+  
+  #LDRE
+  t_ldre_sc_sim <- seq(min(tt$ldre_sc), max(tt$ldre_sc), length.out = 50)
+  #to rescale because data were * 1000 to fit model
+  t_ldre_mass_pred <- (mass_gamma_mn[i] + mass_theta2_mn[i] * t_ldre_sc_sim) / 1000
+  t_ldre_wing_pred <- (wing_gamma_mn[i] + wing_theta2_mn[i] * t_ldre_sc_sim) / 1000
+  
+  #SPAT
+  t_DHI_spat_sc_sim <- seq(min(tt$DHI_spat_sc), max(tt$DHI_spat_sc), length.out = 50)
+  #to rescale because data were * 1000 to fit model
+  t_DHI_spat_mass_pred <- (mass_gamma_mn[i] + mass_theta3_mn[i] * t_DHI_spat_sc_sim) / 1000
+  t_DHI_spat_wing_pred <- (wing_gamma_mn[i] + wing_theta3_mn[i] * t_DHI_spat_sc_sim) / 1000
+  
+  #TEMP
+  t_DHI_temp_sc_sim <- seq(min(tt$DHI_temp_sc), max(tt$DHI_temp_sc), length.out = 50)
+  #to rescale because data were * 1000 to fit model
+  t_DHI_temp_mass_pred <- (mass_gamma_mn[i] + mass_theta4_mn[i] * t_DHI_temp_sc_sim) / 1000
+  t_DHI_temp_wing_pred <- (wing_gamma_mn[i] + wing_theta4_mn[i] * t_DHI_temp_sc_sim) / 1000
+  
+  #fill df cov
+  pred_df$sp_id[counter:(counter + 49)] <- i
+  #transform to raw lat
+  pred_df$lat[counter:(counter + 49)] <- t_lat_sc_sim + mean(tt$lat)
+  pred_df$lat_sc[counter:(counter + 49)] <- t_lat_sc_sim
+  
+  pred_df$ldre[counter:(counter + 49)] <- t_ldre_sc_sim + mean(tt$ldre)
+  pred_df$ldre_sc[counter:(counter + 49)] <- t_ldre_sc_sim
+  
+  pred_df$DHI_spat[counter:(counter + 49)] <- t_DHI_spat_sc_sim + mean(tt$DHI_spat)
+  pred_df$DHI_spat_sc[counter:(counter + 49)] <- t_DHI_spat_sc_sim
+  
+  pred_df$DHI_temp[counter:(counter + 49)] <- t_DHI_temp_sc_sim + mean(tt$DHI_temp)
+  pred_df$DHI_temp_sc[counter:(counter + 49)] <- t_DHI_temp_sc_sim
+  
+  #fill df ped
+  pred_df$mass_pred_lat[counter:(counter + 49)] <- t_lat_mass_pred
+  pred_df$wing_pred_lat[counter:(counter + 49)] <- t_lat_wing_pred
+  
+  pred_df$mass_pred_ldre[counter:(counter + 49)] <- t_ldre_mass_pred
+  pred_df$wing_pred_ldre[counter:(counter + 49)] <- t_ldre_wing_pred
+  
+  pred_df$mass_pred_DHI_spat[counter:(counter + 49)] <- t_DHI_spat_mass_pred
+  pred_df$wing_pred_DHI_spat[counter:(counter + 49)] <- t_DHI_spat_wing_pred
+  
+  pred_df$mass_pred_DHI_temp[counter:(counter + 49)] <- t_DHI_temp_mass_pred
+  pred_df$wing_pred_DHI_temp[counter:(counter + 49)] <- t_DHI_temp_wing_pred
+  counter <- counter + 50
+}
+
+#get lat values and sim line
+o_lat_sim <- seq(min(pred_df$lat), max(pred_df$lat), length.out = 50)
+#get lat_sc values
+o_lat_sc_sim <- o_lat_sim - mean(pred_df$lat)
+#to rescale because data were * 1000 to fit model
+o_lat_mass_pred_mat <- matrix(NA, 
+                              nrow = NROW(mass_mu_gamma_ch), 
+                              ncol = 50)
+o_lat_wing_pred_mat <- matrix(NA, 
+                              nrow = NROW(mass_mu_gamma_ch), 
+                              ncol = 50)
+for (i in 1:NROW(mass_mu_gamma_ch))
+{
+  o_lat_mass_pred_mat[i,] <- (mass_mu_gamma_ch[i,] + 
+                                mass_mu_theta1_ch[i,] * o_lat_sc_sim) / 1000  
+  o_lat_wing_pred_mat[i,] <- (wing_mu_gamma_ch[i,] + 
+                                wing_mu_theta1_ch[i,] * o_lat_sc_sim) / 1000  
+}
+
+#ldre
+o_ldre_sim <- seq(min(pred_df$ldre), max(pred_df$ldre), length.out = 50)
+o_ldre_sc_sim <- o_ldre_sim - mean(pred_df$ldre)
+o_ldre_mass_pred_mat <- matrix(NA, 
+                               nrow = NROW(mass_mu_gamma_ch), 
+                               ncol = 50)
+o_ldre_wing_pred_mat <- matrix(NA, 
+                               nrow = NROW(mass_mu_gamma_ch), 
+                               ncol = 50)
+for (i in 1:NROW(mass_mu_gamma_ch))
+{
+  o_ldre_mass_pred_mat[i,] <- (mass_mu_gamma_ch[i,] + 
+                                 mass_mu_theta2_ch[i,] * o_ldre_sc_sim) / 1000  
+  o_ldre_wing_pred_mat[i,] <- (wing_mu_gamma_ch[i,] + 
+                                 wing_mu_theta2_ch[i,] * o_ldre_sc_sim) / 1000  
+}
+
+
+#SPAT
+o_spat_sim <- seq(min(pred_df$DHI_spat), max(pred_df$DHI_spat), length.out = 50)
+o_spat_sc_sim <- o_spat_sim - mean(pred_df$DHI_spat)
+o_DHI_spat_mass_pred_mat <- matrix(NA, 
+                                   nrow = NROW(mass_mu_gamma_ch), 
+                                   ncol = 50)
+o_DHI_spat_wing_pred_mat <- matrix(NA, 
+                                   nrow = NROW(mass_mu_gamma_ch), 
+                                   ncol = 50)
+for (i in 1:NROW(mass_mu_gamma_ch))
+{
+  o_DHI_spat_mass_pred_mat[i,] <- (mass_mu_gamma_ch[i,] + 
+                                     mass_mu_theta3_ch[i,] * o_spat_sc_sim) / 1000  
+  o_DHI_spat_wing_pred_mat[i,] <- (wing_mu_gamma_ch[i,] + 
+                                     wing_mu_theta3_ch[i,] * o_spat_sc_sim) / 1000  
+}
+
+
+
+#TEMP
+o_temp_sim <- seq(min(pred_df$DHI_temp), max(pred_df$DHI_temp), length.out = 50)
+o_temp_sc_sim <- o_temp_sim - mean(pred_df$DHI_temp)
+o_DHI_temp_mass_pred_mat <- matrix(NA, 
+                                   nrow = NROW(mass_mu_gamma_ch), 
+                                   ncol = 50)
+o_DHI_temp_wing_pred_mat <- matrix(NA, 
+                                   nrow = NROW(mass_mu_gamma_ch), 
+                                   ncol = 50)
+for (i in 1:NROW(mass_mu_gamma_ch))
+{
+  o_DHI_temp_mass_pred_mat[i,] <- (mass_mu_gamma_ch[i,] + 
+                                     mass_mu_theta4_ch[i,] * o_temp_sc_sim) / 1000  
+  o_DHI_temp_wing_pred_mat[i,] <- (wing_mu_gamma_ch[i,] + 
+                                     wing_mu_theta4_ch[i,] * o_temp_sc_sim) / 1000  
+}
+
+
+#plot df for cross species effects
+pred_df2 <- data.frame(lat = o_lat_sim,
+                       lat_sc = o_lat_sc_sim,
+                       mass_pred_lat = apply(o_lat_mass_pred_mat, 2, mean),
+                       mass_pred_lat_LCI = apply(o_lat_mass_pred_mat, 2, 
+                                                 function(x) quantile(x, probs = 0.055)),
+                       mass_pred_lat_UCI = apply(o_lat_mass_pred_mat, 2, 
+                                                 function(x) quantile(x, probs = 0.945)),
+                       wing_pred_lat = apply(o_lat_wing_pred_mat, 2, mean),
+                       wing_pred_lat_LCI = apply(o_lat_wing_pred_mat, 2, 
+                                                 function(x) quantile(x, probs = 0.055)),
+                       wing_pred_lat_UCI = apply(o_lat_wing_pred_mat, 2, 
+                                                 function(x) quantile(x, probs = 0.945)),
+                       ldre = o_ldre_sim,
+                       ldre_sc = o_ldre_sc_sim,
+                       mass_pred_ldre = o_ldre_mass_pred,
+                       wing_pred_ldre = o_ldre_wing_pred,
+                       mass_pred_ldre = apply(o_ldre_mass_pred_mat, 2, mean),
+                       mass_pred_ldre_LCI = apply(o_ldre_mass_pred_mat, 2, 
+                                                  function(x) quantile(x, probs = 0.055)),
+                       mass_pred_ldre_UCI = apply(o_ldre_mass_pred_mat, 2, 
+                                                  function(x) quantile(x, probs = 0.945)),
+                       wing_pred_ldre = apply(o_ldre_wing_pred_mat, 2, mean),
+                       wing_pred_ldre_LCI = apply(o_ldre_wing_pred_mat, 2, 
+                                                  function(x) quantile(x, probs = 0.055)),
+                       wing_pred_ldre_UCI = apply(o_ldre_wing_pred_mat, 2, 
+                                                  function(x) quantile(x, probs = 0.945)),
+                       DHI_spat = o_spat_sim,
+                       DHI_spat_sc = o_spat_sc_sim,
+                       mass_pred_DHI_spat = apply(o_DHI_spat_mass_pred_mat, 2, mean),
+                       mass_pred_DHI_spat_LCI = apply(o_DHI_spat_mass_pred_mat, 2, 
+                                                      function(x) quantile(x, probs = 0.055)),
+                       mass_pred_DHI_spat_UCI = apply(o_DHI_spat_mass_pred_mat, 2, 
+                                                      function(x) quantile(x, probs = 0.945)),
+                       wing_pred_DHI_spat = apply(o_DHI_spat_wing_pred_mat, 2, mean),
+                       wing_pred_DHI_spat_LCI = apply(o_DHI_spat_wing_pred_mat, 2, 
+                                                      function(x) quantile(x, probs = 0.055)),
+                       wing_pred_DHI_spat_UCI = apply(o_DHI_spat_wing_pred_mat, 2, 
+                                                      function(x) quantile(x, probs = 0.945)),
+                       DHI_temp = o_temp_sim,
+                       DHI_temp_sc = o_temp_sc_sim,
+                       mass_pred_DHI_temp = apply(o_DHI_temp_mass_pred_mat, 2, mean),
+                       mass_pred_DHI_temp_LCI = apply(o_DHI_temp_mass_pred_mat, 2, 
+                                                      function(x) quantile(x, probs = 0.055)),
+                       mass_pred_DHI_temp_UCI = apply(o_DHI_temp_mass_pred_mat, 2, 
+                                                      function(x) quantile(x, probs = 0.945)),
+                       wing_pred_DHI_temp = apply(o_DHI_temp_wing_pred_mat, 2, mean),
+                       wing_pred_DHI_temp_LCI = apply(o_DHI_temp_wing_pred_mat, 2, 
+                                                      function(x) quantile(x, probs = 0.055)),
+                       wing_pred_DHI_temp_UCI = apply(o_DHI_temp_wing_pred_mat, 2, 
+                                                      function(x) quantile(x, probs = 0.945)))
+
+
+#get ylim
+# str(pred_df2)
+# ps <- dplyr::select(pred_df2,
+#               -lat, -lat_sc,
+#               -ldre, -ldre_sc,
+#               -DHI_spat, -DHI_spat_sc,
+#               -DHI_temp, - DHI_temp_sc) 
+# rng_mass <- range(dplyr::select(ps, dplyr::starts_with('mass'))) 
+# rng_wing <- range(dplyr::select(ps, dplyr::starts_with('wing')))
+
+#LAT
+lat_mass_plt <- ggplot() + 
+  #mass predictions - species-specific
+  # geom_line(data = pred_df, 
+  #           aes(x = lat, y = mass_pred_lat, group = sp_id), 
+  #           color = "#482677FF", 
+  #           lwd = 1.2,
+  #           alpha = 0.2) + 
+  #mass predictions - cross-species
+  geom_ribbon(data = pred_df2, 
+              aes(x = lat, ymin = mass_pred_lat_LCI, ymax = mass_pred_lat_UCI), 
+              fill = "#482677FF", alpha = 0.2) +
+  geom_line(data = pred_df2, 
+            aes(x = lat, y = mass_pred_lat), 
+            color = "#482677FF", 
+            lwd = 2) +
+  # #wing predictions - species-specific
+  # geom_line(data = pred_df, 
+  #           aes(x = lat, y = wing_pred_lat, group = sp_id), 
+  #           color = "#29AF7FFF", 
+  #           lwd = 1.2,
+  #           alpha = 0.2) + 
+  # #wing predictions - cross-species
+  # geom_ribbon(data = pred_df2, 
+  #           aes(x = lat, ymin = wing_pred_lat_LCI, ymax = wing_pred_lat_UCI), 
+  #           fill = "#29AF7FFF", alpha = 0.2) +
+  # geom_line(data = pred_df2, 
+  #           aes(x = lat, y = wing_pred_lat), 
+  #           color = "#29AF7FFF", 
+  #           lwd = 2) +
+  theme_bw() + 
+  xlab('Latitude') + 
+  ylab(NULL) +
+  theme(axis.text.x = element_text(size = 12),
+        axis.text.y = element_text(size = 12),
+        axis.title.x = element_text(size = 14, margin = margin(t = 10)),
+        axis.title.y = element_text(size = 14, margin = margin(t = 10)),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.border = element_rect(color = "black", fill = NA),
+        plot.title = element_text(size = 18)) +
+  scale_y_continuous(breaks = c(0.020, 0.023, 0.026),
+                     limits = rng_mass) +
+  ggtitle('lat_mass')
+
+lat_wing_plt <- ggplot() + 
+  #wing predictions - species-specific
+  geom_ribbon(data = pred_df2,
+              aes(x = lat, ymin = wing_pred_lat_LCI, ymax = wing_pred_lat_UCI),
+              fill = "#29AF7FFF", alpha = 0.2) +
+  geom_line(data = pred_df2,
+            aes(x = lat, y = wing_pred_lat),
+            color = "#29AF7FFF",
+            lwd = 2) +
+  theme_bw() + 
+  xlab('Latitude') + 
+  ylab(NULL) +
+  theme(axis.text.x = element_text(size = 12),
+        axis.text.y = element_text(size = 12),
+        axis.title.x = element_text(size = 14, margin = margin(t = 10)),
+        axis.title.y = element_text(size = 14, margin = margin(t = 10)),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.border = element_rect(color = "black", fill = NA),
+        plot.title = element_text(size = 18)) +
+  scale_y_continuous(breaks = c(0.0066, 0.0070, 0.0074),
+                     limits = rng_wing) +
+  ggtitle('lat wing')
+
+
+#LDRE
+ldre_mass_plt <- ggplot() + 
+  # #mass predictions - species-specific
+  # geom_line(data = pred_df, 
+  #           aes(x = ldre, y = mass_pred_ldre, group = sp_id), 
+  #           color = "#482677FF", 
+  #           lwd = 1.2,
+  #           alpha = 0.2) + 
+  #mass predictions - cross-species
+  geom_ribbon(data = pred_df2, 
+              aes(x = ldre, ymin = mass_pred_ldre_LCI, ymax = mass_pred_ldre_UCI), 
+              fill = "#482677FF", alpha = 0.2) +
+  geom_line(data = pred_df2, 
+            aes(x = ldre, y = mass_pred_ldre), 
+            color = "#482677FF", 
+            lwd = 2) +
+  # #wing predictions - species-specific
+  # geom_line(data = pred_df, 
+  #           aes(x = ldre, y = wing_pred_ldre, group = sp_id), 
+  #           color = "#29AF7FFF", 
+  #           lwd = 1.2,
+  #           alpha = 0.2) + 
+  # #wing predictions - cross-species
+  # geom_line(data = pred_df2, 
+  #           aes(x = ldre, y = wing_pred_ldre), 
+  #           color = "#29AF7FFF", 
+  #           lwd = 2) +
+  theme_bw() + 
+  xlab('LDRE') + 
+  ylab(NULL) +
+  theme(axis.text.x = element_text(size = 12),
+        axis.text.y = element_text(size = 12),
+        axis.title.x = element_text(size = 14, margin = margin(t = 10)),
+        axis.title.y = element_text(size = 14, margin = margin(t = 10)),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.border = element_rect(color = "black", fill = NA),
+        plot.title = element_text(size = 18)) +
+  scale_x_continuous(breaks = c(0, log(7), log(55), log(400)), 
+                     labels = c(0, 7, 55, 400)) +
+  scale_y_continuous(breaks = c(0.020, 0.023, 0.026),
+                     limits = rng_mass) +
+  ggtitle('ldre mass')
+
+
+ldre_wing_plt <- ggplot() + 
+  #wing predictions - cross-species
+  geom_ribbon(data = pred_df2, 
+              aes(x = ldre, ymin = wing_pred_ldre_LCI, ymax = wing_pred_ldre_UCI), 
+              fill = "#29AF7FFF", alpha = 0.2) +
+  geom_line(data = pred_df2, 
+            aes(x = ldre, y = wing_pred_ldre), 
+            color = "#29AF7FFF", 
+            lwd = 2) +
+  theme_bw() + 
+  xlab('LDRE') + 
+  ylab(NULL) +
+  theme(axis.text.x = element_text(size = 12),
+        axis.text.y = element_text(size = 12),
+        axis.title.x = element_text(size = 14, margin = margin(t = 10)),
+        axis.title.y = element_text(size = 14, margin = margin(t = 10)),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.border = element_rect(color = "black", fill = NA),
+        plot.title = element_text(size = 18)) +
+  scale_x_continuous(breaks = c(0, log(7), log(55), log(400)), 
+                     labels = c(0, 7, 55, 400)) +
+  scale_y_continuous(breaks = c(0.0066, 0.0070, 0.0074),
+                     limits = rng_wing) +
+  ggtitle('ldre wing')
+
+
+
+#SPAT
+spat_mass_plt <- ggplot() + 
+  #mass predictions - species-specific
+  # geom_line(data = pred_df, 
+  #           aes(x = DHI_spat, y = mass_pred_DHI_spat, group = sp_id), 
+  #           color = "#482677FF", 
+  #           lwd = 1.2,
+  #           alpha = 0.2) + 
+  #mass predictions - cross-species
+  geom_ribbon(data = pred_df2, 
+              aes(x = DHI_spat, ymin = mass_pred_DHI_spat_LCI, ymax = mass_pred_DHI_spat_UCI), 
+              fill = "#482677FF", alpha = 0.2) +
+  geom_line(data = pred_df2, 
+            aes(x = DHI_spat, y = mass_pred_DHI_spat), 
+            color = "#482677FF", 
+            lwd = 2) +
+  # #wing predictions - species-specific
+  # geom_line(data = pred_df, 
+  #           aes(x = DHI_spat, y = wing_pred_DHI_spat, group = sp_id), 
+  #           color = "#29AF7FFF", 
+  #           lwd = 1.2,
+  #           alpha = 0.2) + 
+  # #wing predictions - cross-species
+  # geom_line(data = pred_df2, 
+  #           aes(x = DHI_spat, y = wing_pred_DHI_spat), 
+  #           color = "#29AF7FFF", 
+  #           lwd = 2) +
+  theme_bw() + 
+  xlab('SPAT') + 
+  ylab(NULL) +
+  theme(axis.text.x = element_text(size = 12),
+        axis.text.y = element_text(size = 12),
+        axis.title.x = element_text(size = 14, margin = margin(t = 10)),
+        axis.title.y = element_text(size = 14, margin = margin(t = 10)),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.border = element_rect(color = "black", fill = NA),
+        plot.title = element_text(size = 18)) +
+  scale_x_continuous(breaks = c(log(0.02), log(0.09), log(0.37)), 
+                     labels = c(0.02, 0.09, 0.37)) +
+  scale_y_continuous(breaks = c(0.020, 0.023, 0.026),
+                     limits = rng_mass) +
+  ggtitle('spat mass')
+
+spat_wing_plt <- ggplot() + 
+  #wing predictions - cross-species
+  geom_ribbon(data = pred_df2, 
+              aes(x = DHI_spat, ymin = wing_pred_DHI_spat_LCI, ymax = wing_pred_DHI_spat_UCI), 
+              fill = "#29AF7FFF", alpha = 0.2) +
+  geom_line(data = pred_df2, 
+            aes(x = DHI_spat, y = wing_pred_DHI_spat), 
+            color = "#29AF7FFF", 
+            lwd = 2) +
+  theme_bw() + 
+  xlab('SPAT') + 
+  ylab(NULL) +
+  theme(axis.text.x = element_text(size = 12),
+        axis.text.y = element_text(size = 12),
+        axis.title.x = element_text(size = 14, margin = margin(t = 10)),
+        axis.title.y = element_text(size = 14, margin = margin(t = 10)),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.border = element_rect(color = "black", fill = NA),
+        plot.title = element_text(size = 18)) +
+  scale_x_continuous(breaks = c(log(0.02), log(0.09), log(0.37)), 
+                     labels = c(0.02, 0.09, 0.37)) +
+  scale_y_continuous(breaks = c(0.0066, 0.0070, 0.0074),
+                     limits = rng_wing) +
+  ggtitle('spat wing')
+
+
+#TEMP
+temp_mass_plt <- ggplot() + 
+  #mass predictions - species-specific
+  # geom_line(data = pred_df, 
+  #           aes(x = DHI_temp, y = mass_pred_DHI_temp, group = sp_id), 
+  #           color = "#482677FF", 
+  #           lwd = 1.2,
+  #           alpha = 0.2) + 
+  #mass predictions - cross-species
+  geom_ribbon(data = pred_df2, 
+              aes(x = DHI_temp, ymin = mass_pred_DHI_temp_LCI, ymax = mass_pred_DHI_temp_UCI), 
+              fill = "#482677FF", alpha = 0.2) +
+  geom_line(data = pred_df2, 
+            aes(x = DHI_temp, y = mass_pred_DHI_temp), 
+            color = "#482677FF", 
+            lwd = 2) +
+  # #wing predictions - species-specific
+  # geom_line(data = pred_df, 
+  #           aes(x = DHI_temp, y = wing_pred_DHI_temp, group = sp_id), 
+  #           color = "#29AF7FFF", 
+  #           lwd = 1.2,
+  #           alpha = 0.2) + 
+  # #wing predictions - cross-species
+  # geom_line(data = pred_df2, 
+  #           aes(x = DHI_temp, y = wing_pred_DHI_temp), 
+  #           color = "#29AF7FFF", 
+  #           lwd = 2) +
+  theme_bw() + 
+  xlab('TEMP') + 
+  ylab(NULL) +
+  theme(axis.text.x = element_text(size = 12),
+        axis.text.y = element_text(size = 12),
+        axis.title.x = element_text(size = 14, margin = margin(t = 10)),
+        axis.title.y = element_text(size = 14, margin = margin(t = 10)),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.border = element_rect(color = "black", fill = NA),
+        plot.title = element_text(size = 18)) +
+  scale_x_continuous(breaks = c(log(0.02), log(0.09), log(0.37)), 
+                     labels = c(0.02, 0.09, 0.37)) +
+  scale_y_continuous(breaks = c(0.020, 0.023, 0.026),
+                     limits = rng_mass) +
+  ggtitle('temp mass')
+
+temp_wing_plt <- ggplot() + 
+  #wing predictions - cross-species
+  geom_ribbon(data = pred_df2, 
+              aes(x = DHI_temp, ymin = wing_pred_DHI_temp_LCI, ymax = wing_pred_DHI_temp_UCI), 
+              fill = "#29AF7FFF", alpha = 0.2) +
+  geom_line(data = pred_df2, 
+            aes(x = DHI_temp, y = wing_pred_DHI_temp), 
+            color = "#29AF7FFF", 
+            lwd = 2) +
+  theme_bw() + 
+  xlab('TEMP') + 
+  ylab(NULL) +
+  ylim(rng_wing) +
+  theme(axis.text.x = element_text(size = 12),
+        axis.text.y = element_text(size = 12),
+        axis.title.x = element_text(size = 14, margin = margin(t = 10)),
+        axis.title.y = element_text(size = 14, margin = margin(t = 10)),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.border = element_rect(color = "black", fill = NA),
+        plot.title = element_text(size = 18)) +
+  scale_x_continuous(breaks = c(log(0.02), log(0.09), log(0.37)), 
+                     labels = c(0.02, 0.09, 0.37)) +
+  scale_y_continuous(breaks = c(0.0066, 0.0070, 0.0074),
+                     limits = rng_wing) +
+  ggtitle('temp wing')
+
+H <- 1.8
+W <- 2
+
+ggsave(filename = paste0(dir, 'Results/lat_mass.pdf'),
+       width = W,
+       height = H,
+       lat_mass_plt)
+
+ggsave(filename = paste0(dir, 'Results/lat_wing.pdf'),
+       width = W,
+       height = H,
+       lat_wing_plt)
+
+ggsave(filename = paste0(dir, 'Results/ldre_mass.pdf'),
+       width = W,
+       height = H,
+       ldre_mass_plt)
+
+ggsave(filename = paste0(dir, 'Results/ldre_wing.pdf'),
+       width = W,
+       height = H,
+       ldre_wing_plt)
+
+ggsave(filename = paste0(dir, 'Results/spat_mass.pdf'),
+       width = W,
+       height = H,
+       spat_mass_plt)
+
+ggsave(filename = paste0(dir, 'Results/spat_wing.pdf'),
+       width = W,
+       height = H,
+       spat_wing_plt)
+
+ggsave(filename = paste0(dir, 'Results/temp_mass.pdf'),
+       width = W,
+       height = H,
+       temp_mass_plt)
+
+ggsave(filename = paste0(dir, 'Results/temp_wing.pdf'),
+       width = W,
+       height = H,
+       temp_wing_plt)
+
+
+#cat plots
+#LAT
+lat_mass_cat <- ggplot() +
+  geom_hline(yintercept = 0,
+             linetype = "dashed",
+             color = "gray60",
+             linewidth = 1) +
+  geom_jitter(data = dplyr::filter(species_means_Masslong,
+                                   parameter == 'mu_theta1'),
+              aes(x = factor(parameter,
+                             levels = c("mu_theta1")),
+                  y = as.numeric(value)),
+              color = "#482677FF",
+              alpha = 0.10,
+              size = 3,
+              stroke = 0,
+              width = 0.20) +
+  geom_pointrange(data = dplyr::filter(overall_meanMass,
+                                       parameter == 'mu_theta1'),
+                  aes(x = factor(parameter,
+                                 levels = c("mu_theta1")),
+                      y = mean,
+                      ymin = q055,
+                      ymax = q945),
+                  color = "#482677FF",
+                  linewidth = 1.2,
+                  fatten = 5) +
+  theme_minimal() +
+  labs(x = NULL, y = NULL, title = NULL) +
+  theme(axis.text.x = element_text(size = 12),
+        axis.text.y = element_blank(),
+        axis.ticks = element_line(color = "black"),
+        axis.ticks.y = element_blank(),
+        axis.title.x = element_text(size = 14, margin = margin(t = 15)),
+        axis.title.y = element_blank(),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.border = element_rect(color = "black", fill = NA),
+        plot.title = element_text(hjust = 0.5, size = 15)) +
+  coord_flip()
+
+lat_wing_cat <- ggplot() +
+  geom_hline(yintercept = 0,
+             linetype = "dashed",
+             color = "gray60",
+             linewidth = 1) +
+  geom_jitter(data = dplyr::filter(species_means_Winglong,
+                                   parameter == 'mu_theta1'),
+              aes(x = factor(parameter,
+                             levels = c("mu_theta1")),
+                  y = as.numeric(value)),
+              color = "#29AF7FFF",
+              alpha = 0.15,
+              size = 3,
+              stroke = 0,
+              width = 0.20) +
+  geom_pointrange(data = dplyr::filter(overall_meanWing,
+                                       parameter == 'mu_theta1'),
+                  aes(x = factor(parameter,
+                                 levels = c("mu_theta1")),
+                      y = mean,
+                      ymin = q055,
+                      ymax = q945),
+                  color = "#29AF7FFF",
+                  linewidth = 1.2,
+                  fatten = 5) +
+  theme_minimal() +
+  labs(x = NULL, y = NULL, title = NULL) +
+  theme(axis.text.x = element_text(size = 12),
+        axis.text.y = element_blank(),
+        axis.ticks = element_line(color = "black"),
+        axis.ticks.y = element_blank(),
+        axis.title.x = element_text(size = 14, margin = margin(t = 15)),
+        axis.title.y = element_blank(),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.border = element_rect(color = "black", fill = NA),
+        plot.title = element_text(hjust = 0.5, size = 15)) +
+  coord_flip()
+
+# LDRE
+ldre_mass_cat <- ggplot() +
+  geom_hline(yintercept = 0,
+             linetype = "dashed",
+             color = "gray60",
+             linewidth = 1) +
+  geom_jitter(data = dplyr::filter(species_means_Masslong,
+                                   parameter == 'mu_theta2'),
+              aes(x = factor(parameter,
+                             levels = c("mu_theta2")),
+                  y = as.numeric(value)),
+              color = "#482677FF",
+              alpha = 0.10,
+              size = 3,
+              stroke = 0,
+              width = 0.20) +
+  geom_pointrange(data = dplyr::filter(overall_meanMass,
+                                       parameter == 'mu_theta2'),
+                  aes(x = factor(parameter,
+                                 levels = c("mu_theta2")),
+                      y = mean,
+                      ymin = q055,
+                      ymax = q945),
+                  color = "#482677FF",
+                  linewidth = 1.2,
+                  fatten = 5) +
+  theme_minimal() +
+  labs(x = NULL, y = NULL, title = NULL) +
+  theme(axis.text.x = element_text(size = 12),
+        axis.text.y = element_blank(),
+        axis.ticks = element_line(color = "black"),
+        axis.ticks.y = element_blank(),
+        axis.title.x = element_text(size = 14, margin = margin(t = 15)),
+        axis.title.y = element_blank(),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.border = element_rect(color = "black", fill = NA),
+        plot.title = element_text(hjust = 0.5, size = 15)) +
+  coord_flip()
+
+ldre_wing_cat <- ggplot() +
+  geom_hline(yintercept = 0,
+             linetype = "dashed",
+             color = "gray60",
+             linewidth = 1) +
+  geom_jitter(data = dplyr::filter(species_means_Winglong,
+                                   parameter == 'mu_theta2'),
+              aes(x = factor(parameter,
+                             levels = c("mu_theta2")),
+                  y = as.numeric(value)),
+              color = "#29AF7FFF",
+              alpha = 0.15,
+              size = 3,
+              stroke = 0,
+              width = 0.20) +
+  geom_pointrange(data = dplyr::filter(overall_meanWing,
+                                       parameter == 'mu_theta2'),
+                  aes(x = factor(parameter,
+                                 levels = c("mu_theta2")),
+                      y = mean,
+                      ymin = q055,
+                      ymax = q945),
+                  color = "#29AF7FFF",
+                  linewidth = 1.2,
+                  fatten = 5) +
+  theme_minimal() +
+  labs(x = NULL, y = NULL, title = NULL) +
+  theme(axis.text.x = element_text(size = 12),
+        axis.text.y = element_blank(),
+        axis.ticks = element_line(color = "black"),
+        axis.ticks.y = element_blank(),
+        axis.title.x = element_text(size = 14, margin = margin(t = 15)),
+        axis.title.y = element_blank(),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.border = element_rect(color = "black", fill = NA),
+        plot.title = element_text(hjust = 0.5, size = 15)) +
+  coord_flip()
+
+#SPAT
+spat_mass_cat <- ggplot() +
+  geom_hline(yintercept = 0,
+             linetype = "dashed",
+             color = "gray60",
+             linewidth = 1) +
+  geom_jitter(data = dplyr::filter(species_means_Masslong,
+                                   parameter == 'mu_theta3'),
+              aes(x = factor(parameter,
+                             levels = c("mu_theta3")),
+                  y = as.numeric(value)),
+              color = "#482677FF",
+              alpha = 0.10,
+              size = 3,
+              stroke = 0,
+              width = 0.20) +
+  geom_pointrange(data = dplyr::filter(overall_meanMass,
+                                       parameter == 'mu_theta3'),
+                  aes(x = factor(parameter,
+                                 levels = c("mu_theta3")),
+                      y = mean,
+                      ymin = q055,
+                      ymax = q945),
+                  color = "#482677FF",
+                  linewidth = 1.2,
+                  fatten = 5) +
+  theme_minimal() +
+  labs(x = NULL, y = NULL, title = NULL) +
+  theme(axis.text.x = element_text(size = 12),
+        axis.text.y = element_blank(),
+        axis.ticks = element_line(color = "black"),
+        axis.ticks.y = element_blank(),
+        axis.title.x = element_text(size = 14, margin = margin(t = 15)),
+        axis.title.y = element_blank(),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.border = element_rect(color = "black", fill = NA),
+        plot.title = element_text(hjust = 0.5, size = 15)) +
+  coord_flip()
+
+spat_wing_cat <- ggplot() +
+  geom_hline(yintercept = 0,
+             linetype = "dashed",
+             color = "gray60",
+             linewidth = 1) +
+  geom_jitter(data = dplyr::filter(species_means_Winglong,
+                                   parameter == 'mu_theta3'),
+              aes(x = factor(parameter,
+                             levels = c("mu_theta3")),
+                  y = as.numeric(value)),
+              color = "#29AF7FFF",
+              alpha = 0.15,
+              size = 3,
+              stroke = 0,
+              width = 0.20) +
+  geom_pointrange(data = dplyr::filter(overall_meanWing,
+                                       parameter == 'mu_theta3'),
+                  aes(x = factor(parameter,
+                                 levels = c("mu_theta3")),
+                      y = mean,
+                      ymin = q055,
+                      ymax = q945),
+                  color = "#29AF7FFF",
+                  linewidth = 1.2,
+                  fatten = 5) +
+  theme_minimal() +
+  labs(x = NULL, y = NULL, title = NULL) +
+  theme(axis.text.x = element_text(size = 12),
+        axis.text.y = element_blank(),
+        axis.ticks = element_line(color = "black"),
+        axis.ticks.y = element_blank(),
+        axis.title.x = element_text(size = 14, margin = margin(t = 15)),
+        axis.title.y = element_blank(),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.border = element_rect(color = "black", fill = NA),
+        plot.title = element_text(hjust = 0.5, size = 15)) +
+  coord_flip()
+
+
+# TEMP
+temp_mass_cat <- ggplot() +
+  geom_hline(yintercept = 0,
+             linetype = "dashed",
+             color = "gray60",
+             linewidth = 1) +
+  geom_jitter(data = dplyr::filter(species_means_Masslong,
+                                   parameter == 'mu_theta4'),
+              aes(x = factor(parameter,
+                             levels = c("mu_theta4")),
+                  y = as.numeric(value)),
+              color = "#482677FF",
+              alpha = 0.10,
+              size = 3,
+              stroke = 0,
+              width = 0.20) +
+  geom_pointrange(data = dplyr::filter(overall_meanMass,
+                                       parameter == 'mu_theta4'),
+                  aes(x = factor(parameter,
+                                 levels = c("mu_theta4")),
+                      y = mean,
+                      ymin = q055,
+                      ymax = q945),
+                  color = "#482677FF",
+                  linewidth = 1.2,
+                  fatten = 5) +
+  theme_minimal() +
+  labs(x = NULL, y = NULL, title = NULL) +
+  theme(axis.text.x = element_text(size = 12),
+        axis.text.y = element_blank(),
+        axis.ticks = element_line(color = "black"),
+        axis.ticks.y = element_blank(),
+        axis.title.x = element_text(size = 14, margin = margin(t = 15)),
+        axis.title.y = element_blank(),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.border = element_rect(color = "black", fill = NA),
+        plot.title = element_text(hjust = 0.5, size = 15)) +
+  coord_flip()
+
+temp_wing_cat <- ggplot() +
+  geom_hline(yintercept = 0,
+             linetype = "dashed",
+             color = "gray60",
+             linewidth = 1) +
+  geom_jitter(data = dplyr::filter(species_means_Winglong,
+                                   parameter == 'mu_theta4'),
+              aes(x = factor(parameter,
+                             levels = c("mu_theta4")),
+                  y = as.numeric(value)),
+              color = "#29AF7FFF",
+              alpha = 0.15,
+              size = 3,
+              stroke = 0,
+              width = 0.20) +
+  geom_pointrange(data = dplyr::filter(overall_meanWing,
+                                       parameter == 'mu_theta4'),
+                  aes(x = factor(parameter,
+                                 levels = c("mu_theta4")),
+                      y = mean,
+                      ymin = q055,
+                      ymax = q945),
+                  color = "#29AF7FFF",
+                  linewidth = 1.2,
+                  fatten = 5) +
+  theme_minimal() +
+  labs(x = NULL, y = NULL, title = NULL) +
+  theme(axis.text.x = element_text(size = 12),
+        axis.text.y = element_blank(),
+        axis.ticks = element_line(color = "black"),
+        axis.ticks.y = element_blank(),
+        axis.title.x = element_text(size = 14, margin = margin(t = 15)),
+        axis.title.y = element_blank(),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.border = element_rect(color = "black", fill = NA),
+        plot.title = element_text(hjust = 0.5, size = 15)) +
+  coord_flip()
+
+H2 <- 1
+W2 <- 1.8
+
+ggsave(filename = paste0(dir, 'Results/lat_mass_cat.pdf'),
+       width = W2,
+       height = H2,
+       lat_mass_cat)
+
+ggsave(filename = paste0(dir, 'Results/lat_wing_cat.pdf'),
+       width = W2,
+       height = H2,
+       lat_wing_cat)
+
+
+ggsave(filename = paste0(dir, 'Results/ldre_mass_cat.pdf'),
+       width = W2,
+       height = H2,
+       ldre_mass_cat)
+
+ggsave(filename = paste0(dir, 'Results/ldre_wing_cat.pdf'),
+       width = W2,
+       height = H2,
+       ldre_wing_cat)
+
+
+ggsave(filename = paste0(dir, 'Results/spat_mass_cat.pdf'),
+       width = W2,
+       height = H2,
+       spat_mass_cat)
+
+ggsave(filename = paste0(dir, 'Results/spat_wing_cat.pdf'),
+       width = W2,
+       height = H2,
+       spat_wing_cat)
+
+
+ggsave(filename = paste0(dir, 'Results/temp_mass_cat.pdf'),
+       width = W2,
+       height = H2,
+       temp_mass_cat)
+
+ggsave(filename = paste0(dir, 'Results/temp_wing_cat.pdf'),
+       width = W2,
+       height = H2,
+       temp_wing_cat)
 
 
 # Supplemental information --------------------------------------------
