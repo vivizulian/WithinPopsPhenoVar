@@ -14,9 +14,7 @@
 
 run_date <- Sys.Date()
 cv_data_date <- '2025-01-08'
-dir <- '~/Documents/MorphCVLatitude/' #change as needed
-# dir <- '~/Work/Research/Projects/MorphCVLatitude/'
-
+dir <- 'XXXX' #location of working diretory - change as needed
 
 
 # load packages -----------------------------------------------------------
@@ -26,7 +24,6 @@ library(MCMCvis)
 library(tidyverse)
 library(tidyr)
 library(shinystan)
-
 
 
 # read in data -----------------
