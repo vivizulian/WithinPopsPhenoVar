@@ -1373,8 +1373,6 @@ MCMCtrace(fitWing,
           wd = paste0(dir, 'Results'))
 
 
-
-
 # Calculate the % change over latitude for each species --------------------------------------------
 
 #extract parameter estimates
@@ -1424,8 +1422,12 @@ for(i in 1:nrow(lat_data)) {
   }
  
   #(predicted CV at max lat - predicted CV at min lat) / predicted CV at min lat = % change
-  changeMass <- ((tmp_df[,2]-tmp_df[,1])/tmp_df[,1])*100
-  changeWing <- ((tmp_df[,4]-tmp_df[,3])/tmp_df[,3])*100
+  #changeMass <- ((tmp_df[,2]-tmp_df[,1])/tmp_df[,1])*100
+  #changeWing <- ((tmp_df[,4]-tmp_df[,3])/tmp_df[,3])*100
+
+  # % change in mass and wing cv per 10 degrees latitude
+  changeMass <- ((((tmp_df[,2]-tmp_df[,1])/tmp_df[,1])/lat_data[i,6])*100)*10
+  changeWing <- ((((tmp_df[,4]-tmp_df[,3])/tmp_df[,3])/lat_data[i,6])*100)*10
   
   percentage_changeM[i, "mean_change"] <- mean(changeMass)
   percentage_changeM[i, "q055"] <- quantile(changeMass, probs = 0.055)
@@ -1437,22 +1439,14 @@ for(i in 1:nrow(lat_data)) {
   
 }
 
-
-# Look at the results:
 mean(as.numeric(percentage_changeM$mean_change))
-# -8.009595
-# ~8% lower CV mass in higher latitudes on average
-
 mean(as.numeric(percentage_changeW$mean_change))
-# -2.676539
-# 2.7% lower wing CV in higher latitudes on average
-
+                                 
 
 #join data frames
 percentage_change <- rbind(percentage_changeM, percentage_changeW)
 
-
-pdf(paste0(dir, 'Results/perc-change-', run_date, '.pdf'), width = 8, height = 18)
+pdf(paste0(dir, 'Results/perc-change10degree-', run_date, '.pdf'), width = 8, height = 18)
 
 #plot results
 ggplot() +
@@ -1460,10 +1454,9 @@ ggplot() +
   geom_pointrange(data = percentage_change, aes(y = reorder(sci_name, desc(sci_name)),
                                                x = mean_change, xmin = q055, xmax = q945, group = trait, colour = trait), 
                   linewidth = 1.2, fatten = 2, position = position_dodge(width = 0.6)) +
-  labs(x = '% Change on trait CV',
-    y = NULL,
-    title = "Percentage Change in Mass and Wing Length",
-    color = NULL) + 
+  labs(x = '% Change on body mass and wing length CV per 10 degree latitude increase',
+       y = NULL,
+       color = NULL) + 
   scale_color_manual(values = c("mass" = "#482677FF", "wing" = "#29AF7FFF")) +
   theme_minimal() +
   theme(axis.text.x = element_text(size = 10),
@@ -1487,6 +1480,331 @@ write.csv(percentage_change, file = paste0(dir, 'Results/percentage_change-', ru
           row.names = FALSE)
 
 
+#average cross-species response
+#extract parameter estimates
+mu_gamma_spM <- as.data.frame(MCMCvis::MCMCchains(fitMass, params = 'mu_gamma'))
+mu_thetameanM <- as.data.frame(MCMCvis::MCMCchains(fitMass, params = 'mu_theta1'))
+
+mu_gamma_spW <- as.data.frame(MCMCvis::MCMCchains(fitWing, params = 'mu_gamma'))
+mu_thetameanW <- as.data.frame(MCMCvis::MCMCchains(fitWing, params = 'mu_theta1'))
+
+
+mn_CVmass <- matrix(NA, nrow = NROW(mu_gamma_spM), ncol = length(o_lat_sc_sim))
+mn_CVwing <- matrix(NA, nrow = NROW(mu_gamma_spM), ncol = length(o_lat_sc_sim))
+mn_CVmass10 <- matrix(NA, nrow = NROW(mu_gamma_spM), ncol = 2)
+mn_CVwing10 <- matrix(NA, nrow = NROW(mu_gamma_spM), ncol = 2)
+
+#o_lat_sc_sim from above
+#10 degrees of latitude from in middle of lat range for all species
+slat10 <- c(mean(o_lat_sc_sim) - 5, mean(o_lat_sc_sim) + 5)
+
+for (i in 1:NROW(mu_gamma_spM))
+{
+  #entire range of lat values
+  mn_CVmass[i,] <- (mu_gamma_spM[i,1] + (mu_thetameanM[i,1] * o_lat_sc_sim))/1000
+  mn_CVwing[i,] <- (mu_gamma_spW[i,1] + (mu_thetameanW[i,1] * o_lat_sc_sim))/1000
+
+  #per 10 degrees lat
+  mn_CVmass10[i,] <- (mu_gamma_spM[i,1] + (mu_thetameanM[i,1] * slat10))/1000
+  mn_CVwing10[i,] <- (mu_gamma_spW[i,1] + (mu_thetameanW[i,1] * slat10))/1000
+}
+
+hist(apply(mn_CVmass, 1, function(x) (max(x) - min(x)) / min(x)))
+hist(apply(mn_CVwing, 1, function(x) (max(x) - min(x)) / min(x)))
+mean(apply(mn_CVmass, 1, function(x) (max(x) - min(x)) / min(x)))
+mean(apply(mn_CVwing, 1, function(x) (max(x) - min(x)) / min(x)))
+
+hist(apply(mn_CVmass10, 1, function(x) (max(x) - min(x)) / min(x)))
+hist(apply(mn_CVwing10, 1, function(x) (max(x) - min(x)) / min(x)))
+mean(apply(mn_CVmass10, 1, function(x) (max(x) - min(x)) / min(x)))
+mean(apply(mn_CVwing10, 1, function(x) (max(x) - min(x)) / min(x)))
+
+
+# Calculate the % change over Distance to range edge for each species --------------------------------------------
+
+#extract parameter estimates
+gamma_spM <- as.data.frame(MCMCvis::MCMCchains(fitMass, params = 'gamma'))
+thetameanM <- as.data.frame(MCMCvis::MCMCchains(fitMass, params = 'theta2'))
+
+gamma_spW <- as.data.frame(MCMCvis::MCMCchains(fitWing, params = 'gamma'))
+thetameanW <- as.data.frame(MCMCvis::MCMCchains(fitWing, params = 'theta2'))
+
+#extract the mean/sd of original data (log) + min and max of scaled data - scale data ends with '_str'
+dist_data <- raw_data_mass %>%
+  dplyr::group_by(sci_name) %>%
+  dplyr::summarize(meanDist = mean(as.numeric(distance_edge_km_buffer10)),
+                   sdDist = sd(as.numeric(distance_edge_km_buffer10)),
+                   Distminim = min(as.numeric(distance_edge_km_buffer10)),
+                   Distmaxim = max(as.numeric(distance_edge_km_buffer10)),
+                   RangeDist = Distmaxim-Distminim,
+                   minDist_str = min(as.numeric(ldre_sc)),
+                   maxDist_str = max(as.numeric(ldre_sc)),
+                   MinMaxDistSp = n())
+dist_data <- data.frame(dist_data)
+
+result_list <- list()
+percentage_changeM <- percentage_changeW <- as.data.frame(matrix(NA, nrow=nrow(dist_data), ncol = 5))
+colnames(percentage_changeM) <- colnames(percentage_changeW) <- c('sci_name', 'mean_change', 'q055', 'q945','trait') 
+percentage_changeM[, 'sci_name'] <- percentage_changeW[, 'sci_name'] <- dist_data$sci_name
+percentage_changeM[, 'trait'] <- rep('mass', nrow(dist_data))
+percentage_changeW[, 'trait'] <- rep('wing', nrow(dist_data))
+
+
+for (i in 1:nrow(dist_data)) {
+
+  print(paste0(i, ' of ', nrow(dist_data)))
+
+  tmpDist <- seq(dist_data$minDist_str[i], dist_data$maxDist_str[i], length.out = 2)
+
+  tmpCVmass <- as.data.frame(matrix(NA, nrow = nrow(gamma_spM), ncol = length(tmpDist)))
+  tmpCVwing <- as.data.frame(matrix(NA, nrow = nrow(gamma_spW), ncol = length(tmpDist)))
+
+  for (j in 1:nrow(gamma_spM)){
+    tmpCVmass[j,] <- (gamma_spM[j,i] + (thetameanM[j,i] * tmpDist))/1000
+    tmpCVwing[j,] <- (gamma_spW[j,i] + (thetameanW[j,i] * tmpDist))/1000
+  }
+
+  # what I need is only the predictions of the min lat and max lat (first and last columns)
+  # Combine tmpDist and tmpCV into a data frame
+  tmp_df <- data.frame(tmpCVmass = tmpCVmass[,c(1, length(tmpDist))], 
+                       tmpCVwing = tmpCVwing[,c(1, length(tmpDist))])
+
+  result_list[[i]] <- tmp_df #saving all values in case we need to extract other estimates
+
+  #(predicted CV at max lat - predicted CV at min lat) / predicted CV at min lat = % change
+  #changeMass <- ((tmp_df[,2]-tmp_df[,1])/tmp_df[,1])*100
+  #changeWing <- ((tmp_df[,4]-tmp_df[,3])/tmp_df[,3])*100
+
+  # % change in mass and wing cv per 10 degrees latitude
+  changeMass <- ((tmp_df[,2]-tmp_df[,1])/tmp_df[,1])*100
+  changeWing <- ((tmp_df[,4]-tmp_df[,3])/tmp_df[,3])*100
+
+  percentage_changeM[i, "mean_change"] <- mean(changeMass)
+  percentage_changeM[i, "q055"] <- quantile(changeMass, probs = 0.055)
+  percentage_changeM[i, "q945"] <- quantile(changeMass, probs = 0.945)
+
+  percentage_changeW[i, "mean_change"] <- mean(changeWing)
+  percentage_changeW[i, "q055"] <- quantile(changeWing, probs = 0.055)
+  percentage_changeW[i, "q945"] <- quantile(changeWing, probs = 0.945)
+}
+
+mean(as.numeric(percentage_changeM$mean_change))
+mean(as.numeric(percentage_changeW$mean_change))
+
+#average cross-species response
+#extract parameter estimates
+mu_thetameanM <- as.data.frame(MCMCvis::MCMCchains(fitMass, params = 'mu_theta2'))
+mu_thetameanW <- as.data.frame(MCMCvis::MCMCchains(fitWing, params = 'mu_theta2'))
+
+mn_CVmass <- matrix(NA, nrow = NROW(mu_gamma_spM), ncol = length(o_ldre_sc_sim))
+mn_CVwing <- matrix(NA, nrow = NROW(mu_gamma_spM), ncol = length(o_ldre_sc_sim))
+
+#o_ldre_sc_sim from above
+for (i in 1:NROW(mu_gamma_spM))
+{
+  print(paste0(i, ' of ', NROW(mu_gamma_spM)))
+  #entire range of lat values
+  mn_CVmass[i,] <- (mu_gamma_spM[i,1] + (mu_thetameanM[i,1] * o_ldre_sc_sim))/1000
+  mn_CVwing[i,] <- (mu_gamma_spW[i,1] + (mu_thetameanW[i,1] * o_ldre_sc_sim))/1000
+}
+
+hist(apply(mn_CVmass, 1, function(x) (max(x) - min(x)) / min(x)))
+hist(apply(mn_CVwing, 1, function(x) (max(x) - min(x)) / min(x)))
+mean(apply(mn_CVmass, 1, function(x) (max(x) - min(x)) / min(x)))
+mean(apply(mn_CVwing, 1, function(x) (max(x) - min(x)) / min(x)))
+
+
+# Calculate the % change over Spatial variation in DHI for each species --------------------------------------------
+
+#extract parameter estimates
+gamma_spM <- as.data.frame(MCMCvis::MCMCchains(fitMass, params = 'gamma'))
+thetameanM <- as.data.frame(MCMCvis::MCMCchains(fitMass, params = 'theta3'))
+
+gamma_spW <- as.data.frame(MCMCvis::MCMCchains(fitWing, params = 'gamma'))
+thetameanW <- as.data.frame(MCMCvis::MCMCchains(fitWing, params = 'theta3'))
+
+#extract the mean/sd of original data (log) + min and max of scaled data - scale data ends with '_str'
+spat_data <- raw_data_mass %>%
+  dplyr::group_by(sci_name) %>%
+  dplyr::summarize(meanSpat = mean(as.numeric(DHI_spatial_var_10km)),
+                   sdSpat = sd(as.numeric(DHI_spatial_var_10km)),
+                   Spatminim = min(as.numeric(DHI_spatial_var_10km)),
+                   Spatmaxim = max(as.numeric(DHI_spatial_var_10km)),
+                   RangeSpat = Spatmaxim-Spatminim,
+                   minSpat_str = min(as.numeric(DHI_spat_sc)),
+                   maxSpat_str = max(as.numeric(DHI_spat_sc)),
+                   MinMaxSpatSp = n())
+spat_data <- data.frame(spat_data)
+
+result_list <- list()
+percentage_changeM <- percentage_changeW <- as.data.frame(matrix(NA, nrow=nrow(spat_data), ncol = 5))
+colnames(percentage_changeM) <- colnames(percentage_changeW) <- c('sci_name', 'mean_change', 'q055', 'q945','trait') 
+percentage_changeM[, 'sci_name'] <- percentage_changeW[, 'sci_name'] <- spat_data$sci_name
+percentage_changeM[, 'trait'] <- rep('mass', nrow(spat_data))
+percentage_changeW[, 'trait'] <- rep('wing', nrow(spat_data))
+
+
+for(i in 1:nrow(spat_data)) {
+
+  print(paste0(i, ' of ', nrow(dist_data)))
+
+  tmpSpat <- seq(spat_data$minSpat_str[i], spat_data$maxSpat_str[i], length.out = 2)
+
+  tmpCVmass <- as.data.frame(matrix(NA, nrow = nrow(gamma_spM), ncol = length(tmpSpat)))
+  tmpCVwing <- as.data.frame(matrix(NA, nrow = nrow(gamma_spW), ncol = length(tmpSpat)))
+
+  for(j in 1:nrow(gamma_spM)){
+    tmpCVmass[j,] <- (gamma_spM[j,i] + (thetameanM[j,i] * tmpSpat))/1000
+    tmpCVwing[j,] <- (gamma_spW[j,i] + (thetameanW[j,i] * tmpSpat))/1000
+  }
+
+  # what I need is only the predictions of the min lat and max lat (first and last columns)
+  # Combine tmpDist and tmpCV into a data frame
+  tmp_df <- data.frame(tmpCVmass = tmpCVmass[,c(1, length(tmpSpat))], 
+                       tmpCVwing = tmpCVwing[,c(1, length(tmpSpat))])
+
+  result_list[[i]] <- tmp_df #saving all values in case we need to extract other estimates
+
+  #(predicted CV at max lat - predicted CV at min lat) / predicted CV at min lat = % change
+  #changeMass <- ((tmp_df[,2]-tmp_df[,1])/tmp_df[,1])*100
+  #changeWing <- ((tmp_df[,4]-tmp_df[,3])/tmp_df[,3])*100
+
+  # % change in mass and wing cv per 10 degrees latitude
+  changeMass <- ((tmp_df[,2]-tmp_df[,1])/tmp_df[,1])*100
+  changeWing <- ((tmp_df[,4]-tmp_df[,3])/tmp_df[,3])*100
+
+  percentage_changeM[i, "mean_change"] <- mean(changeMass)
+  percentage_changeM[i, "q055"] <- quantile(changeMass, probs = 0.055)
+  percentage_changeM[i, "q945"] <- quantile(changeMass, probs = 0.945)
+
+  percentage_changeW[i, "mean_change"] <- mean(changeWing)
+  percentage_changeW[i, "q055"] <- quantile(changeWing, probs = 0.055)
+  percentage_changeW[i, "q945"] <- quantile(changeWing, probs = 0.945)
+
+}
+
+mean(as.numeric(percentage_changeM$mean_change))
+mean(as.numeric(percentage_changeW$mean_change))
+
+
+#average cross-species response
+#extract parameter estimates
+mu_thetameanM <- as.data.frame(MCMCvis::MCMCchains(fitMass, params = 'mu_theta3'))
+mu_thetameanW <- as.data.frame(MCMCvis::MCMCchains(fitWing, params = 'mu_theta3'))
+
+mn_CVmass <- matrix(NA, nrow = NROW(mu_gamma_spM), ncol = length(o_spat_sc_sim))
+mn_CVwing <- matrix(NA, nrow = NROW(mu_gamma_spM), ncol = length(o_spat_sc_sim))
+
+#o_spat_sc_sim from above
+for (i in 1:NROW(mu_gamma_spM))
+{
+  print(paste0(i, ' of ', NROW(mu_gamma_spM)))
+  #entire range of lat values
+  mn_CVmass[i,] <- (mu_gamma_spM[i,1] + (mu_thetameanM[i,1] * o_spat_sc_sim))/1000
+  mn_CVwing[i,] <- (mu_gamma_spW[i,1] + (mu_thetameanW[i,1] * o_spat_sc_sim))/1000
+}
+
+hist(apply(mn_CVmass, 1, function(x) (max(x) - min(x)) / min(x)))
+hist(apply(mn_CVwing, 1, function(x) (max(x) - min(x)) / min(x)))
+mean(apply(mn_CVmass, 1, function(x) (max(x) - min(x)) / min(x)))
+mean(apply(mn_CVwing, 1, function(x) (max(x) - min(x)) / min(x)))
+
+
+# Calculate the % change over Temporal variation in DHI for each species --------------------------------------------
+
+#extract parameter estimates
+gamma_spM <- as.data.frame(MCMCvis::MCMCchains(fitMass, params = 'gamma'))
+thetameanM <- as.data.frame(MCMCvis::MCMCchains(fitMass, params = 'theta4'))
+
+gamma_spW <- as.data.frame(MCMCvis::MCMCchains(fitWing, params = 'gamma'))
+thetameanW <- as.data.frame(MCMCvis::MCMCchains(fitWing, params = 'theta4'))
+
+#extract the mean/sd of original data (log) + min and max of scaled data - scale data ends with '_str'
+temp_data <- raw_data_mass %>%
+  dplyr::group_by(sci_name) %>%
+  dplyr::summarize(meanTemp = mean(as.numeric(DHI_temporal_var_10km)),
+                   sdTemp = sd(as.numeric(DHI_temporal_var_10km)),
+                   Tempminim = min(as.numeric(DHI_temporal_var_10km)),
+                   Tempmaxim = max(as.numeric(DHI_temporal_var_10km)),
+                   RangeTemp = Tempmaxim-Tempminim,
+                   minTemp_str = min(as.numeric(DHI_temp_sc)),
+                   maxTemp_str = max(as.numeric(DHI_temp_sc)),
+                   MinMaxTempSp = n())
+temp_data <- data.frame(temp_data)
+
+result_list <- list()
+percentage_changeM <- percentage_changeW <- as.data.frame(matrix(NA, nrow=nrow(temp_data), ncol = 5))
+colnames(percentage_changeM) <- colnames(percentage_changeW) <- c('sci_name', 'mean_change', 'q055', 'q945','trait') 
+percentage_changeM[, 'sci_name'] <- percentage_changeW[, 'sci_name'] <- temp_data$sci_name
+percentage_changeM[, 'trait'] <- rep('mass', nrow(temp_data))
+percentage_changeW[, 'trait'] <- rep('wing', nrow(temp_data))
+
+
+for(i in 1:nrow(temp_data)) {
+
+  print(paste0(i, ' of ', nrow(dist_data)))
+
+  tmpTemp <- seq(temp_data$minTemp_str[i], temp_data$maxTemp_str[i], length.out = 2)
+
+  tmpCVmass <- as.data.frame(matrix(NA, nrow = nrow(gamma_spM), ncol = length(tmpTemp)))
+  tmpCVwing <- as.data.frame(matrix(NA, nrow = nrow(gamma_spW), ncol = length(tmpTemp)))
+
+  for(j in 1:nrow(gamma_spM)){
+    tmpCVmass[j,] <- (gamma_spM[j,i] + (thetameanM[j,i] * tmpTemp))/1000
+    tmpCVwing[j,] <- (gamma_spW[j,i] + (thetameanW[j,i] * tmpTemp))/1000
+  }
+
+  # what I need is only the predictions of the min lat and max lat (first and last columns)
+  # Combine tmpTemp and tmpCV into a data frame
+  tmp_df <- data.frame(tmpCVmass = tmpCVmass[,c(1, length(tmpTemp))], 
+                       tmpCVwing = tmpCVwing[,c(1, length(tmpTemp))])
+
+  result_list[[i]] <- tmp_df #saving all values in case we need to extract other estimates
+
+  #(predicted CV at max lat - predicted CV at min lat) / predicted CV at min lat = % change
+  #changeMass <- ((tmp_df[,2]-tmp_df[,1])/tmp_df[,1])*100
+  #changeWing <- ((tmp_df[,4]-tmp_df[,3])/tmp_df[,3])*100
+
+  # % change in mass and wing cv 
+  changeMass <- ((tmp_df[,2]-tmp_df[,1])/tmp_df[,1])*100
+  changeWing <- ((tmp_df[,4]-tmp_df[,3])/tmp_df[,3])*100
+
+  percentage_changeM[i, "mean_change"] <- mean(changeMass)
+  percentage_changeM[i, "q055"] <- quantile(changeMass, probs = 0.055)
+  percentage_changeM[i, "q945"] <- quantile(changeMass, probs = 0.945)
+
+  percentage_changeW[i, "mean_change"] <- mean(changeWing)
+  percentage_changeW[i, "q055"] <- quantile(changeWing, probs = 0.055)
+  percentage_changeW[i, "q945"] <- quantile(changeWing, probs = 0.945)
+
+}
+
+mean(as.numeric(percentage_changeM$mean_change))
+mean(as.numeric(percentage_changeW$mean_change))
+
+#average cross-species response
+#extract parameter estimates
+mu_thetameanM <- as.data.frame(MCMCvis::MCMCchains(fitMass, params = 'mu_theta4'))
+mu_thetameanW <- as.data.frame(MCMCvis::MCMCchains(fitWing, params = 'mu_theta4'))
+
+mn_CVmass <- matrix(NA, nrow = NROW(mu_gamma_spM), ncol = length(o_temp_sc_sim))
+mn_CVwing <- matrix(NA, nrow = NROW(mu_gamma_spM), ncol = length(o_temp_sc_sim))
+
+#o_temp_sc_sim from above
+for (i in 1:NROW(mu_gamma_spM))
+{
+  print(paste0(i, ' of ', NROW(mu_gamma_spM)))
+  #entire range of lat values
+  mn_CVmass[i,] <- (mu_gamma_spM[i,1] + (mu_thetameanM[i,1] * o_temp_sc_sim))/1000
+  mn_CVwing[i,] <- (mu_gamma_spW[i,1] + (mu_thetameanW[i,1] * o_temp_sc_sim))/1000
+}
+
+hist(apply(mn_CVmass, 1, function(x) (max(x) - min(x)) / min(x)))
+hist(apply(mn_CVwing, 1, function(x) (max(x) - min(x)) / min(x)))
+mean(apply(mn_CVmass, 1, function(x) (max(x) - min(x)) / min(x)))
+mean(apply(mn_CVwing, 1, function(x) (max(x) - min(x)) / min(x)))
+
+                                                      
 
 # Calculate the % change of CV for each species --------------------------------------------
 
@@ -1512,16 +1830,56 @@ obs_cv_wing <- raw_data_wing %>%
                    maxCVwing = max(cv_within_post_mean),
                    percChangeWing = ((maxCVwing - minCVwing) / minCVwing)*100)
 
-
 mean(obs_cv_mass$percChangeMass)
-# 107.3725 % change on body mass across species ranges
-
 mean(obs_cv_wing$percChangeWing)
-# 37.52299 % change on wing length across species ranges
 
 
+## Amount of variation in body mass and wing length 
+# a) within populations within species 
+# b) among populations within species 
+# c) across species
+
+# a) For within-pop variation, take the mean of cv_within_among_sp_post_mean 
+#(this is species-specific CV within pops) across all species.
+
+obs_within_pop_var <- cv_data_covs %>%
+  dplyr::group_by(trait) %>%
+  dplyr::distinct(sp_id, .keep_all = TRUE) %>%
+  dplyr::summarize(meanCV = mean(cv_within_among_sp_post_mean),
+                   sdCV = sd(cv_within_among_sp_post_mean))
+# trait  meanCV     sdCV
+# mass   0.0241   0.00586 
+# wing   0.00707  0.000743
 
 
+# b) Among-pop variation, take the mean of cv_across_post_mean 
+#(this is species-specific CV among pops [using the mean and sd across pops of each species]) 
+#across all species.
+
+obs_among_pop_var <- cv_data_covs %>%
+  dplyr::group_by(trait) %>%
+  dplyr::distinct(sp_id, .keep_all = TRUE) %>%
+  dplyr::summarize(meanCV = mean(cv_across_post_mean),
+                   sdCV = sd(cv_across_post_mean))
+# trait  meanCV    sdCV
+# mass   0.0109   0.00497
+# wing   0.00364  0.00177
+
+
+# c) Among-species variation, take the mean of cv_among_sp_post_mean 
+#(this is station-specific CV among species) across all stations.
+
+obs_among_sp_var <- cv_data_covs %>%
+  dplyr::group_by(trait) %>%
+  dplyr::distinct(station_id, .keep_all = TRUE) %>%
+  dplyr::summarize(meanCV = mean(cv_among_sp_post_mean, na.rm = T),
+                   sdCV = sd(cv_among_sp_post_mean, na.rm = T))
+# trait  meanCV   sdCV
+# mass   0.208   0.0666
+# wing   0.0514  0.0192
+
+
+           
 # Density plot for the variation among species --------------------------------------------
 
 mass <- ggplot(raw_data_mass, aes(x = cv_within_post_mean, group = as.factor(sp_id)))  +
