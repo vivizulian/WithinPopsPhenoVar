@@ -168,6 +168,14 @@ pred_values_range$tmpRangeBackscaled <- exp((pred_values_range$tmpRange * range_
 pred_values_range$tmpRangeBackscaledLog <- (pred_values_range$tmpRange * range_data$sdRange) + range_data$meanRange
 
 
+PercChange <- pred_values_range %>%
+  dplyr::filter(tmpRangeBackscaled == min(tmpRangeBackscaled, na.rm = TRUE) | 
+                  tmpRangeBackscaled == max(tmpRangeBackscaled, na.rm = TRUE)) %>%
+  dplyr::select(tmpRangeBackscaled, tmpCVmass, tmpCVwing) %>%
+  dplyr::mutate(change = c((max(tmpCVmass) - min(tmpCVmass)) / min(tmpCVmass) * 100,
+                           ((max(tmpCVwing) - min(tmpCVwing)) / min(tmpCVwing) * 100)))
+
+                                                  
 # Plot
 RangeSize <- ggplot() + 
   #mass predictions
@@ -246,6 +254,14 @@ pred_values_gen <- data.frame(tmpGenL = tmpGenL,
 #backscale the generation length variable
 pred_values_gen$tmpGenBackscaled <- exp((pred_values_gen$tmpGenL * genL_data$sdGenL) + genL_data$meanGenL)
 
+# % change in mass and wing cv for different generation times
+PercChange <- pred_values_gen %>%
+  dplyr::filter(tmpGenBackscaled == min(tmpGenBackscaled, na.rm = TRUE) | 
+                  tmpGenBackscaled == max(tmpGenBackscaled, na.rm = TRUE)) %>%
+  dplyr::select(tmpGenBackscaled, tmpCVmass, tmpCVwing) %>%
+  dplyr::mutate(change = c(((max(tmpCVmass) - min(tmpCVmass)) / min(tmpCVmass))*100,
+                           ((max(tmpCVwing) - min(tmpCVwing)) / min(tmpCVwing))*100))
+                                                  
 
 # Plot
 GenLength <- ggplot() +
@@ -263,7 +279,7 @@ GenLength <- ggplot() +
   
   theme_bw() +
   theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) +
-  xlab("Generation Length (years)") +
+  xlab("Generation Time (years)") +
   ylab(NULL) + 
   theme(axis.text.x = element_text(size = 12),
         axis.text.y = element_text(size = 12),
@@ -324,7 +340,14 @@ pred_values_hwi <- data.frame(tmpHWI = tmpHWI,
 #backscale the generation length variable
 pred_values_hwi$tmpHWIBackscaled <- exp((pred_values_hwi$tmpHWI * HWI_data$sdHWI) + HWI_data$meanHWI)
 
-
+# % change in mass and wing cv for different generation times
+PercChange <- pred_values_hwi %>%
+  dplyr::filter(tmpHWIBackscaled == min(tmpHWIBackscaled, na.rm = TRUE) | 
+                  tmpHWIBackscaled == max(tmpHWIBackscaled, na.rm = TRUE)) %>%
+  dplyr::select(tmpHWIBackscaled, tmpCVmass, tmpCVwing) %>%
+  dplyr::mutate(change = c(((max(tmpCVmass) - min(tmpCVmass)) / min(tmpCVmass))*100,
+                           ((max(tmpCVwing) - min(tmpCVwing)) / min(tmpCVwing))*100))
+                                                   
 # Plot
 HWI <- ggplot() +
   geom_line(data = pred_values_hwi, aes(x = tmpHWIBackscaled, y = tmpCVmass), 
@@ -372,6 +395,17 @@ mig_status_results <- data.frame(variable = c("Mass", "Wing"),
 # Reorder the variable column to have "Wing" at the bottom
 mig_status_results$variable <- factor(mig_status_results$variable, levels = c("Wing", "Mass"))
 
+# For mig_status = 0 
+pred_mass_res <- mean(gamma_spM/1000)
+pred_wing_res <- mean(gamma_spW/1000)
+
+# For mig_status = 1 (e.g. migrant)
+pred_mass_mig <- (gamma_spM + mig_status_data$thetameanM)/1000
+pred_wing_mig <- (gamma_spW + mig_status_data$thetameanW)/1000
+
+mean(((pred_mass_res - pred_mass_mig) / pred_mass_mig )*100)
+# 4.665147
+                                                      
 #plot
 MigratStatus <- ggplot() +
   geom_hline(yintercept = 0, linetype = 'dashed', color = "gray80", linewidth = 1) +
