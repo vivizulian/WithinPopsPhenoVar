@@ -55,8 +55,8 @@ The workflow for this repository involves data read in as raw data at Level 0 (L
     * `mnt/` - phylogenetic trees from BirdTree.org. Download date: 2024-12-13.
     * `DHI/` - Dynamic Habitat Indices from Radeloff et al. 2019 *Remote Sensing of Environment* (https://doi.org/10.1016/j.rse.2018.12.009)
     * `Traits/` - different .csv files containing trait information.
-     * `Bird_et_al_2020_Con_Bio.csv` - generation length data from Bird et al. 2020 *Conservation Biology* (https://doi.org/10.1111/cobi.13486)
-     * `Tobias_et_al_2022_Eco_Letters.csv` - AVONET trait database from Tobias et al. 2022 *Ecology Letters* (https://doi.org/10.1111/ele.13898)
+      * `Bird_et_al_2020_Con_Bio.csv` - generation length data from Bird et al. 2020 *Conservation Biology* (https://doi.org/10.1111/cobi.13486)
+      * `Tobias_et_al_2022_Eco_Letters.csv` - AVONET trait database from Tobias et al. 2022 *Ecology Letters* (https://doi.org/10.1111/ele.13898)
   * `L1/`
     * `MAPS-master-YYYY-MM-DD.rds` - MAPS data
     * `DHI_rast-YYYY-MM-DD.tif` - DHI raster, mean productivity and temporal CV productivity. Intermediate product `2a-process-DHI.R`.
