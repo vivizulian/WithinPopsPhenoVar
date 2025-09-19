@@ -38,7 +38,7 @@ library(MCMCvis)
 # read in data -------------------------------------------------------------
 
 #read in data - already processed and filtered
-meas_data <- readRDS(paste0(dir, 'Data/L1/MAPS-master-', maps_date, '.csv'))
+meas_data <- readRDS(paste0(dir, 'Data/L1/MAPS-master-', maps_date, '.rds'))
 
 # Define the model code
 modelCV <- nimbleCode({
