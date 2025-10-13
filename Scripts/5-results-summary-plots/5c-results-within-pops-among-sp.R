@@ -13,14 +13,6 @@
 #######################
 
 
-# set dirs ----------------------------------------------------------------
-
-run_date <- Sys.Date()
-model_run_date <- '2025-01-10'
-tree_date <- '2025-01-10'
-dir <- 'XXXX' #location of working diretory - change as needed
-
-
 # load packages -----------------------------------------------------------
 
 library(ggplot2)
@@ -30,6 +22,15 @@ library(cowplot)
 library(ape)
 library(phytools)
 library(scales)
+library(here)
+
+
+# set dirs ----------------------------------------------------------------
+
+run_date <- Sys.Date()
+model_run_date <- '2025-01-10'
+tree_date <- '2025-01-10'
+dir <- paste0(here::here(), '/') #location of working directory
 
 
 # read in data -----------------

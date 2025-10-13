@@ -12,20 +12,21 @@
 #######################
 
 
-# set dirs ----------------------------------------------------------------
-
-run_date <- Sys.Date()
-model_run_date <- '2025-01-21'
-cv_data_date <- '2025-01-08'
-dir <- 'XXXX' #location of working diretory - change as needed
-
-
 # load packages -----------------------------------------------------------
 
 library(ggplot2)
 library(MCMCvis)
 library(tidyverse)
 library(tidyr)
+library(here)
+
+
+# set dirs ----------------------------------------------------------------
+
+run_date <- Sys.Date()
+model_run_date <- '2025-01-21'
+cv_data_date <- '2025-01-08'
+dir <- paste0(here::here(), '/') #location of working directory
 
 
 # read in data -----------------

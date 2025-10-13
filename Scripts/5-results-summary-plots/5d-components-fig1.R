@@ -9,21 +9,23 @@
 #######################
 
 
-# set dirs ----------------------------------------------------------------
-
-run_date <- Sys.Date()
-cv_data_date <- '2025-01-08'
-bl_run_date <- '2024-12-13'  #species ranges
-dir <- 'XXXX' #location of working diretory - change as needed
-
-
 # load packages -----------------------------------------------------------
+
 library(sf)
 library(rnaturalearth)
 library(tmap)
 library(smoothr)
 library(terra)
 library(ggplot2)
+library(here)
+
+
+# set dirs ----------------------------------------------------------------
+
+run_date <- Sys.Date()
+cv_data_date <- '2025-01-08'
+bl_run_date <- '2024-12-13'  #species ranges
+dir <- paste0(here::here(), '/') #location of working directory
 
 
 # read in data -----------------

@@ -7,21 +7,22 @@
 #######################
 
 
-# set dirs ----------------------------------------------------------------
-
-run_date <- Sys.Date()
-#tree_date <- '2024-12-13'
-maps_data_date <- '2024-12-12'
-#phylo_date <- '2024-12-15'
-dir <- 'XXXX' #location of working diretory - change as needed
-
-
 # load packages -----------------------------------------------------------
 
 library(ape)
 library(phytools)
 library(dplyr)
 library(tidyr)
+library(here)
+
+
+# set dirs ----------------------------------------------------------------
+
+run_date <- Sys.Date()
+#tree_date <- '2024-12-13'
+maps_data_date <- '2024-12-12'
+#phylo_date <- '2024-12-15'
+dir <- paste0(here::here(), '/') #location of working directory
 
 
 # read in data -----------------------------------------------------------

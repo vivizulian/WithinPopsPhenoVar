@@ -10,13 +10,6 @@
 #######################
 
 
-# set dirs ----------------------------------------------------------------
-
-run_date <- Sys.Date()
-cv_data_date <- '2025-01-08'
-dir <- 'XXXX' #location of working diretory - change as needed
-
-
 # load packages -----------------------------------------------------------
 
 library(cmdstanr)
@@ -24,6 +17,14 @@ library(MCMCvis)
 library(tidyverse)
 library(tidyr)
 library(shinystan)
+library(here)
+
+
+# set dirs ----------------------------------------------------------------
+
+run_date <- Sys.Date()
+cv_data_date <- '2025-01-08'
+dir <- paste0(here::here(), '/') #location of working directory
 
 
 # read in data -----------------

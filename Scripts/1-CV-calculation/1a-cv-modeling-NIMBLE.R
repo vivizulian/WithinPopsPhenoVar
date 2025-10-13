@@ -22,17 +22,19 @@
 ### cv_across_k = sigma_k / mu_k;
 
 
-# set dirs ----------------------------------------------------------------
-
-run_date <- Sys.Date()
-maps_date <- "2024-12-12"
-dir <- 'XXXX' #location of working diretory - change as needed
-
 
 # load packages -----------------------------------------------------------
 
 library(nimble)
 library(MCMCvis)
+library(here)
+
+
+# set dirs ----------------------------------------------------------------
+
+run_date <- Sys.Date()
+maps_date <- "2024-12-12"
+dir <- paste0(here::here(), '/') #location of working directory
 
 
 # read in data -------------------------------------------------------------

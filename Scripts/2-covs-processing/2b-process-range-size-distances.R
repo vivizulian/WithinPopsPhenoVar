@@ -13,15 +13,6 @@
 # Migration distance
 #######################
 
-
-# set dirs ----------------------------------------------------------------
-
-run_date <- Sys.Date()
-maps_data_date <- "2024-12-12"
-bl_run_date <- "2024-12-13"
-dir <- 'XXXX' #location of working diretory - change as needed
-
-
 # load packages -----------------------------------------------------------
 
 library(dplyr)
@@ -29,6 +20,15 @@ library(sf)
 library(rnaturalearth)
 library(ggplot2)
 library(geosphere)
+library(here)
+
+
+# set dirs ----------------------------------------------------------------
+
+run_date <- Sys.Date()
+maps_data_date <- "2024-12-12"
+bl_run_date <- "2024-12-13"
+dir <- paste0(here::here(), '/') #location of working directory
 
 
 # read in data -------------------------------------------------------
