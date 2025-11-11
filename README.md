@@ -7,7 +7,7 @@ Repository containing the analysis to investigate how different mechanisms shape
 
 ## Associated publications
 
-Zulian, V. and C. Youngflesh. Geography, environmental conditions, and life history shape patterns of within-population phenotypic variation in North American birds. **Accepted at _Ecology Letters_**
+Zulian, V. and C. Youngflesh. [Geography, environmental conditions, and life history shape patterns of within-population phenotypic variation in North American birds](https://onlinelibrary.wiley.com/doi/10.1111/ele.70244). **_Ecology Letters_** 28:e70244.
 
 ## Data
 
